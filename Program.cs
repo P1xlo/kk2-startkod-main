@@ -20,7 +20,9 @@ while (true)
         Console.Write("Namn: ");
         string name = Console.ReadLine();
         Console.Write("Pris: ");
-        int price = int.Parse(Console.ReadLine());
+        int price;
+        while(!int.TryParse(Console.ReadLine(), out price) || price <= 0)
+            Console.WriteLine("Skriv ett nummber som är över 0");
         list.Add(new Item(name, price));
     }
     else if (choice == 2)
