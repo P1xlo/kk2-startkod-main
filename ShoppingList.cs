@@ -17,6 +17,7 @@ class ShoppingList
     // Removes the item the user sees as number 1, 2, 3 ...
     public void RemoveAt(int number)
     {
+        Console.WriteLine($"tog bort {items.ElementAt(number -1).Name} som kostade {items.ElementAt(number -1).Price}");
         items.RemoveAt(number - 1);
     }
 

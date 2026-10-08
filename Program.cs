@@ -1,8 +1,11 @@
 ShoppingList list = new ShoppingList("items.txt");
+if(!File.Exists("items.txt"))
+    File.Create("items.txt").Dispose();
 list.Load();
 
 while (true)
 {
+    Console.Clear();
     Console.WriteLine();
     list.Print();
     Console.WriteLine();
@@ -21,6 +24,13 @@ while (true)
     {
         Console.Write("Namn: ");
         string name = Console.ReadLine();
+        while(name.Contains(';') || name =="")
+        {
+            Console.WriteLine("Namenet kan inte innehålla karaktären ';' eller vara tom");
+            Console.Write("Namn: ");
+            name = Console.ReadLine();
+        }
+
         Console.Write("Pris: ");
         int price;
         while(!int.TryParse(Console.ReadLine(), out price) || price <= 0)
@@ -29,15 +39,23 @@ while (true)
     }
     else if (choice == 2)
     {
-        Console.Write("Nummer: ");
-        int number;
-        while(!int.TryParse(Console.ReadLine(), out number) || number <= 0 || number > list.ListCount())
-            Console.WriteLine($"Skriv ett nummer mellan 1 och {list.ListCount()}");
-        list.RemoveAt(number);
+        if(list.ListCount() != 0)
+        {
+            Console.Write("Nummer: ");
+            int number;
+            while(!int.TryParse(Console.ReadLine(), out number) || number <= 0 || number > list.ListCount())
+                Console.WriteLine($"Skriv ett nummer mellan 1 och {list.ListCount()}");
+            list.RemoveAt(number);
+        }
+        else
+            Console.WriteLine("Listan är tom");
+        
+        Console.Read();
     }
     else if (choice == 3)
     {
         list.Save();
+        Console.Read();
     }
     else if (choice == 4)
     {
@@ -53,6 +71,7 @@ while (true)
         {
             Console.WriteLine($"Hittade: {found}");
         }
+        Console.Read();
     }
     else if (choice == 5)
     {
