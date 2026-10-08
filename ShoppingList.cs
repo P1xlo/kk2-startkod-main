@@ -24,8 +24,8 @@ class ShoppingList
     public int Total()
     {
         int sum = 0;
-
-        for (int i = 1; i < items.Count; i++)
+        // made i = 0 instead of 1
+        for (int i = 0; i < items.Count; i++)
         {
             sum += items[i].Price;
         }
@@ -66,14 +66,9 @@ class ShoppingList
         {
             lines.Add($"{item.Price};{item.Name}");
         }
-
-        try
-        {
-            File.WriteAllText(path, string.Join("\r\n", lines) + "\r\n");
-        }
-        catch
-        {
-        }
+        //changed from WriteAllText to WriteAllLines match with the change in load()
+        File.WriteAllLines(path, lines);
+        
 
         Console.WriteLine("Listan är sparad.");
     }
@@ -81,13 +76,21 @@ class ShoppingList
     // Reads the file back into the list.
     public void Load()
     {
-        string text = File.ReadAllText(path);
-        string[] lines = text.Split('\n');
-
-        foreach (string line in lines)
+        //changed to ReadAllLines to remove the text.Split('\n') as it left a '\r' behind that messed with the program.
+        //And  ReadAllLines  \r\n
+        foreach (string line in File.ReadAllLines(path))
         {
+            //if the line is empty it is skipped
+            if (line.Trim() == "") continue;
+
             string[] parts = line.Split(';');
-            items.Add(new Item(parts[1], int.Parse(parts[0])));
+            //The .Trim() removes any leftover \r that would break the program.
+            items.Add(new Item(parts[1].Trim(), int.Parse(parts[0])));
         }
+    }
+
+    public int ListCount()
+    {
+        return items.Count;
     }
 }
