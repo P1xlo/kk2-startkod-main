@@ -3,11 +3,14 @@ if(!File.Exists("items.txt"))
     File.Create("items.txt").Dispose();
 list.Load();
 
+int Budget = 1000;
+
 while (true)
 {
     Console.Clear();
     Console.WriteLine();
     list.Print();
+    Console.WriteLine("Budget: " + Budget);
     Console.WriteLine();
     Console.WriteLine("1. Lägg till vara");
     Console.WriteLine("2. Ta bort vara");
@@ -35,7 +38,15 @@ while (true)
         int price;
         while(!int.TryParse(Console.ReadLine(), out price) || price <= 0)
             Console.WriteLine("Skriv ett nummber som är över 0");
-        list.Add(new Item(name, price));
+        
+        if(CheckBudget(price))
+            list.Add(new Item(name, price));
+        else
+        {
+            Console.WriteLine($"Kan inte lägga till {name} eftersom det går över din budget");
+            Console.Read();
+        }
+            
     }
     else if (choice == 2)
     {
@@ -77,4 +88,13 @@ while (true)
     {
         break;
     }
+}
+
+
+bool CheckBudget(int increase)
+{
+    if(list.Total() + increase > Budget)
+        return false;
+    else
+        return true;
 }
