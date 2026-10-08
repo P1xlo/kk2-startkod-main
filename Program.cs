@@ -13,7 +13,9 @@ while (true)
     Console.WriteLine("5. Avsluta");
     Console.Write("Välj: ");
 
-    int choice = int.Parse(Console.ReadLine());
+    int choice; 
+    while(!int.TryParse(Console.ReadLine(),out choice) || choice < 1 || choice > 5)
+        Console.WriteLine("Skriv ett nummer mellan 1 och 5");
 
     if (choice == 1)
     {
@@ -28,7 +30,9 @@ while (true)
     else if (choice == 2)
     {
         Console.Write("Nummer: ");
-        int number = int.Parse(Console.ReadLine());
+        int number;
+        while(!int.TryParse(Console.ReadLine(), out number) || number <= 0 || number > list.ListCount())
+            Console.WriteLine($"Skriv ett nummer mellan 1 och {list.ListCount()}");
         list.RemoveAt(number);
     }
     else if (choice == 3)
