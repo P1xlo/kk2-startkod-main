@@ -4,14 +4,25 @@ class ShoppingList
     private List<Item> items = new List<Item>();
     private string path;
 
-    public ShoppingList(string path)
+    public int Budget { get; }
+
+    public ShoppingList(string path, int budget)
     {
         this.path = path;
+        Budget = budget;
     }
 
-    public void Add(Item item)
+    // Adds the item if it fits within the budget.
+    // Returns false instead of throwing, because going over the budget is a normal answer, not an error.
+    public bool Add(Item item)
     {
+        if (Total() + item.Price > Budget)
+        {
+            return false;
+        }
+
         items.Add(item);
+        return true;
     }
 
     // Removes the item the user sees as number 1, 2, 3 ...
@@ -67,16 +78,30 @@ class ShoppingList
         {
             lines.Add($"{item.Price};{item.Name}");
         }
-        //changed from WriteAllText to WriteAllLines match with the change in load()
-        File.WriteAllLines(path, lines);
-        
 
-        Console.WriteLine("Listan är sparad.");
+        // Writing can fail even when every item is valid, e.g. if the file is open
+        // in another program (IOException) or is read-only (UnauthorizedAccessException).
+        try
+        {
+            //changed from WriteAllText to WriteAllLines match with the change in load()
+            File.WriteAllLines(path, lines);
+            Console.WriteLine("Listan är sparad.");
+        }
+        catch (IOException)
+        {
+            Console.WriteLine("Kunde inte spara listan. Filen kan vara öppen i ett annat program.");
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Console.WriteLine("Kunde inte spara listan. Programmet har inte behörighet att skriva till filen.");
+        }
     }
 
     // Reads the file back into the list.
     public void Load()
     {
+        int skipped = 0;
+
         //changed to ReadAllLines to remove the text.Split('\n') as it left a '\r' behind that messed with the program.
         //And  ReadAllLines  \r\n
         foreach (string line in File.ReadAllLines(path))
@@ -85,8 +110,32 @@ class ShoppingList
             if (line.Trim() == "") continue;
 
             string[] parts = line.Split(';');
-            //The .Trim() removes any leftover \r that would break the program.
-            items.Add(new Item(parts[1].Trim(), int.Parse(parts[0])));
+
+            // A valid line is exactly "price;name" where the price is a number.
+            if (parts.Length != 2 || !int.TryParse(parts[0], out int price))
+            {
+                skipped++;
+                continue;
+            }
+
+            try
+            {
+                // Added straight to the list and not through Add(), so items that are
+                // already saved are never lost because of the budget.
+                //The .Trim() removes any leftover \r that would break the program.
+                items.Add(new Item(parts[1].Trim(), price));
+            }
+            catch (ArgumentException)
+            {
+                // Empty name or negative price. ArgumentOutOfRangeException is caught here too.
+                skipped++;
+            }
+        }
+
+        if (skipped > 0)
+        {
+            Console.WriteLine($"{skipped} trasiga rader i {path} hoppades över.");
+            Console.ReadLine();
         }
     }
 
